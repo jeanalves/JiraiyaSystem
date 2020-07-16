@@ -25,7 +25,7 @@ using NinjaTrader.Custom.Indicators.JiraiyaIndicators;
 //This namespace holds Strategies in this folder and is required. Do not change it. 
 namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
 {
-	public class Test : Strategy
+	public class JiraiyaRobotV1 : Strategy
 	{
         private int consecutiveWinTradeCounter  = 0;
         private Trade lastTrade;
@@ -37,7 +37,7 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             if (State == State.SetDefaults)
             {
                 Description                                     = @"Enter the description for your new custom Strategy here.";
-                Name                                            = "Test";
+                Name                                            = "Jiraiya Robot V1";
                 Calculate                                       = Calculate.OnPriceChange;
                 EntriesPerDirection                             = 1;
                 EntryHandling                                   = EntryHandling.AllEntries;
