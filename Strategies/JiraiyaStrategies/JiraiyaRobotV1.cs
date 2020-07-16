@@ -106,7 +106,7 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             {
                 string longOrderID = SideTrade.Long + " " + CurrentBar;
                 EnterLong(Convert.ToInt32(DefaultQuantity), longOrderID);
-                SetStopLossAndProfitTarget(SideTrade.Long, longOrderID);
+                SetStopLossAndProfitTarget(SideTrade.Long, longOrderID, 100);
 
                 //This line prevents the same signal open another order in the same bar
                 DowTheoryIndicator1.ResetLongShortSignal();
@@ -117,7 +117,7 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             {
                 string shortOrderID = SideTrade.Short + " " + CurrentBar;
                 EnterShort(Convert.ToInt32(DefaultQuantity), shortOrderID);
-                SetStopLossAndProfitTarget(SideTrade.Short, shortOrderID);
+                SetStopLossAndProfitTarget(SideTrade.Short, shortOrderID, 100);
 
                 //This line prevents the same signal open another order in the same bar
                 DowTheoryIndicator1.ResetLongShortSignal();
