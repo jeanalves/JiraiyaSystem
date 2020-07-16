@@ -1,0 +1,11 @@
+/*
+/*/
+!.gitignore
+
+!Indicators/
+Indicators/*
+!Indicators/JiraiyaIndicators/
+
+!Strategies/
+Strategies/*
+!Strategies/JiraiyaStrategies/
