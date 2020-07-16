@@ -33,8 +33,6 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
         private Trade lastTrade;
         private Indicators.JiraiyaIndicators.DowTheoryIndicator DowTheoryIndicator1;
         private Dictionary<HourList, TimeSpan> hourDictionary;
-        private Order firstOrderEntry;
-        private Order secondOrderEntry;
 
         protected override void OnStateChange()
         {
@@ -43,13 +41,13 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                 Description                                     = @"Enter the description for your new custom Strategy here.";
                 Name                                            = "Jiraiya Robot V1";
                 Calculate                                       = Calculate.OnPriceChange;
-                EntriesPerDirection                             = 10;
+                EntriesPerDirection                             = 1;
                 EntryHandling                                   = EntryHandling.AllEntries;
                 IsExitOnSessionCloseStrategy                    = true;
                 ExitOnSessionCloseSeconds                       = 30;
                 IsFillLimitOnTouch                              = false;
                 MaximumBarsLookBack                             = MaximumBarsLookBack.TwoHundredFiftySix;
-                OrderFillResolution                             = OrderFillResolution.High;
+                OrderFillResolution                             = OrderFillResolution.Standard;
                 Slippage                                        = 0;
                 StartBehavior                                   = StartBehavior.WaitUntilFlat;
                 TimeInForce                                     = TimeInForce.Gtc;
@@ -61,20 +59,15 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                 // See the Help Guide for additional information
                 IsInstantiatedOnEachOptimizationIteration       = IsInstantiatedOnEachOptimizationIterationIsh;
 
-                // Parameters of indicators
-                CalculationTypeDT = CalculationTypeListDowTheory.Pivot;
+                CalculationTypeDT                               = CalculationTypeListDowTheory.Pivot;
                 CalculationTypePCW                              = CalculationTypeList.SwingForward;
                 Strength                                        = 2;
                 MaxPercentOfPivotRetraction                     = 100;
                 MinPercentOfPivotRetraction                     = 0;
-                MinTime                                         = HourList.hr00h00;
-                MaxTime                                         = HourList.hr23h59;
-                // Parameters of strategy
+                MinTime                                         = HourList.hr01h00;
+                MaxTime                                         = HourList.hr12h00;
                 PlotOnChart                                     = true;
                 IsInstantiatedOnEachOptimizationIterationIsh    = true;
-                FirstTargetPercent                              = 60;  // 61,8
-                SecondTargetPercent                             = 160; // 161,8
-                IsAllowedToMoveStopLoss                         = true;
             }
             else if (State == State.Configure)
             {
@@ -111,15 +104,9 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             // Set 1
             if (DowTheoryIndicator1[0] == Buy)
             {
-                // First entry
-                string firstLongOrderSignalName = "First long entry  " + CurrentBar;
-                firstOrderEntry = EnterLong(DefaultQuantity, firstLongOrderSignalName);
-                SetStopLossAndProfitTarget(SideTrade.Long, firstLongOrderSignalName, FirstTargetPercent);
-
-                // Second entry
-                string secondLongOrderSignalName = "Second long entry  " + CurrentBar;
-                secondOrderEntry = EnterLong(DefaultQuantity, secondLongOrderSignalName);
-                SetStopLossAndProfitTarget(SideTrade.Long, secondLongOrderSignalName, SecondTargetPercent);
+                string longOrderID = SideTrade.Long + " " + CurrentBar;
+                EnterLong(Convert.ToInt32(DefaultQuantity), longOrderID);
+                SetStopLossAndProfitTarget(SideTrade.Long, longOrderID);
 
                 //This line prevents the same signal open another order in the same bar
                 DowTheoryIndicator1.ResetLongShortSignal();
@@ -128,15 +115,9 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             // Set 2
             if (DowTheoryIndicator1[0] == Sell)
             {
-                // First entry
-                string firstShortOrderSignalName = "First short entry " + CurrentBar;
-                firstOrderEntry = EnterShort(DefaultQuantity, firstShortOrderSignalName);
-                SetStopLossAndProfitTarget(SideTrade.Short, firstShortOrderSignalName, FirstTargetPercent);
-
-                // Second entry
-                string secondShortOrderSignalName = "Second short entry " + CurrentBar;
-                secondOrderEntry = EnterShort(DefaultQuantity, secondShortOrderSignalName);
-                SetStopLossAndProfitTarget(SideTrade.Short, secondShortOrderSignalName, SecondTargetPercent);
+                string shortOrderID = SideTrade.Short + " " + CurrentBar;
+                EnterShort(Convert.ToInt32(DefaultQuantity), shortOrderID);
+                SetStopLossAndProfitTarget(SideTrade.Short, shortOrderID);
 
                 //This line prevents the same signal open another order in the same bar
                 DowTheoryIndicator1.ResetLongShortSignal();
@@ -160,8 +141,8 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             // Multiplicar pela quantidade de lotes
 
             // Criar c�digo para aplicar estrat�gia de soros
-            if(IsInStrategyAnalyzer)
-                PrintStrategyStatus();
+
+            PrintStrategyStatus();
         }
 
         /// <summary>
@@ -174,21 +155,16 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             if (order.OrderState == OrderState.Rejected)
             {
                 Code.Output.Process(time + "    " + error, PrintTo.OutputTab2);
-
-                CloseCurrentPosition();
-            }
-
-            // Move stop loss if the first target price is filled/executed
-            if (firstOrderEntry != null &&
-                order.FromEntrySignal == firstOrderEntry.Name && 
-                IsAllowedToMoveStopLoss)
-            {
-                if(order.OrderState == OrderState.Filled)
+                
+                switch(Position.MarketPosition)
                 {
-                    if (Position.MarketPosition == MarketPosition.Long)
-                        SetStopLoss(secondOrderEntry.Name, CalculationMode.Price, Position.AveragePrice + (TickSize * 3),false);
-                    else if (Position.MarketPosition == MarketPosition.Short)
-                        SetStopLoss(secondOrderEntry.Name, CalculationMode.Price, Position.AveragePrice - (TickSize * 3), false);
+                    case MarketPosition.Long:
+                        ExitLong("Panic order", "");
+                        break;
+
+                    case MarketPosition.Short:
+                        ExitShort("Panic order", "");
+                        break;
                 }
             }
         }
@@ -219,7 +195,7 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                       "Current consecutive win: " + consecutiveWinTradeCounter);
         }
 
-        private void SetStopLossAndProfitTarget(SideTrade sideTrade, string orderSignalName, double targetPercent)
+        private void SetStopLossAndProfitTarget(SideTrade sideTrade, string orderID, double targetPercent)
         {
             //----Bearish----|---Bullish---
             //----3----------|----------0--
@@ -236,37 +212,37 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             switch (sideTrade)
             {
                 case SideTrade.Long:
-                    Draw.Line(this, "Stop loss line from: " + orderSignalName + " " + pointOne.Index,
+                    Draw.Line(this, "Stop loss line " + pointOne.Index,
                               ConvertBarIndexToBarsAgo(this, pointTwo.BarIndex), pointOne.Price,
                               ConvertBarIndexToBarsAgo(this, pointZero.BarIndex), pointOne.Price, Brushes.Green);
 
                     // Definir um ponto para o stop
-                    SetStopLoss(orderSignalName, CalculationMode.Price, pointOne.Price, false);
+                    SetStopLoss(orderID, CalculationMode.Price, pointOne.Price, false);
 
                     double longTargetPrice = MirrorFibonacciCalc(pointOne, pointTwo, targetPercent, SideTrade.Long);
 
-                    Draw.Line(this, "Profit target line from: " + orderSignalName + " " + pointOne.Index,
+                    Draw.Line(this, "Profit target line " + pointOne.Index,
                               ConvertBarIndexToBarsAgo(this, pointTwo.BarIndex), longTargetPrice,
                               ConvertBarIndexToBarsAgo(this, pointZero.BarIndex), longTargetPrice, Brushes.Green);
 
-                    SetProfitTarget(orderSignalName, CalculationMode.Price, longTargetPrice, false);
+                    SetProfitTarget(orderID, CalculationMode.Price, longTargetPrice, false);
                     break;
 
                 case SideTrade.Short:
-                    Draw.Line(this, "Stop loss line from: " + orderSignalName + " " + pointOne.Index,
+                    Draw.Line(this, "Stop loss line " + pointOne.Index,
                               ConvertBarIndexToBarsAgo(this, pointTwo.BarIndex), pointOne.Price,
                               ConvertBarIndexToBarsAgo(this, pointZero.BarIndex), pointOne.Price, Brushes.Red);
 
                     // Definir um ponto para o stop
-                    SetStopLoss(orderSignalName, CalculationMode.Price, pointOne.Price, false);
+                    SetStopLoss(orderID, CalculationMode.Price, pointOne.Price, false);
 
                     double shortTargetPrice = MirrorFibonacciCalc(pointOne, pointTwo, targetPercent, SideTrade.Short);
 
-                    Draw.Line(this, "Profit target line from: " + orderSignalName + " " + pointOne.Index,
+                    Draw.Line(this, "Profit target line " + pointOne.Index,
                               ConvertBarIndexToBarsAgo(this, pointTwo.BarIndex), shortTargetPrice,
                               ConvertBarIndexToBarsAgo(this, pointZero.BarIndex), shortTargetPrice, Brushes.Red);
 
-                    SetProfitTarget(orderSignalName, CalculationMode.Price, shortTargetPrice);
+                    SetProfitTarget(orderID, CalculationMode.Price, shortTargetPrice);
                     break;
             }
         }
@@ -297,20 +273,6 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                     return rangePrice *= -1;
             }
             return 0;
-        }
-
-        private void CloseCurrentPosition()
-        {
-            switch (Position.MarketPosition)
-            {
-                case MarketPosition.Long:
-                    ExitLong("Panic order", "");
-                    break;
-
-                case MarketPosition.Short:
-                    ExitShort("Panic order", "");
-                    break;
-            }
         }
 
         private static int ConvertBarIndexToBarsAgo(NinjaScriptBase owner, int barIndex)
@@ -432,66 +394,51 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
 
         #region Properties
         [NinjaScriptProperty]
-        [Display(Name = "Dow theory calculation type", Order = 0, GroupName = "Parameters of indicators")]
+        [Display(Name = "Dow theory calculation type", Order = 0, GroupName = "Parameters")]
         public CalculationTypeListDowTheory CalculationTypeDT
         { get; set; }
 
         [NinjaScriptProperty]
-        [Display(Name = "Price action swing calculation type", Order = 1, GroupName = "Parameters of indicators")]
+        [Display(Name = "Price action swing calculation type", Order = 1, GroupName = "Parameters")]
         public CalculationTypeList CalculationTypePCW
         { get; set; }
 
         [NinjaScriptProperty]
         [Range(0, int.MaxValue)]
-        [Display(Name = "Strength", Order = 2, GroupName = "Parameters of indicators")]
+        [Display(Name = "Strength", Order = 2, GroupName = "Parameters")]
         public int Strength
         { get; set; }
 
         [NinjaScriptProperty]
         [Range(0, 100)]
-        [Display(Name = "Max percent of pivot retraction", Order = 3, GroupName = "Parameters of indicators")]
+        [Display(Name = "Max percent of pivot retraction", Order = 3, GroupName = "Parameters")]
         public double MaxPercentOfPivotRetraction
         { get; set; }
 
         [NinjaScriptProperty]
         [Range(0, 100)]
-        [Display(Name = "Min percent of pivot retraction", Order = 4, GroupName = "Parameters of indicators")]
+        [Display(Name = "Min percent of pivot retraction", Order = 4, GroupName = "Parameters")]
         public double MinPercentOfPivotRetraction
         { get; set; }
 
         [NinjaScriptProperty]
-        [Display(Name = "Min time", Order = 5, GroupName = "Parameters of strategy")]
+        [Display(Name = "Min time", Order = 5, GroupName = "Parameters")]
         public HourList MinTime
         { get; set; }
 
         [NinjaScriptProperty]
-        [Display(Name = "Max time", Order = 6, GroupName = "Parameters of strategy")]
+        [Display(Name = "Max time", Order = 6, GroupName = "Parameters")]
         public HourList MaxTime
         { get; set; }
 
         [NinjaScriptProperty]
-        [Display(Name = "Plot on chart", Order = 7, GroupName = "Parameters of strategy")]
+        [Display(Name = "Plot on chart", Order = 7, GroupName = "Parameters")]
         public bool PlotOnChart
         { get; set; }
 
         [NinjaScriptProperty]
-        [Display(Name = "Is Instantiated On Each Optimization Iteration", Order = 8, GroupName = "Parameters of strategy")]
+        [Display(Name = "Is Instantiated On Each Optimization Iteration", Order = 8, GroupName = "Parameters")]
         public bool IsInstantiatedOnEachOptimizationIterationIsh
-        { get; set; }
-
-        [NinjaScriptProperty]
-        [Display(Name = "First target percentage", Order = 9, GroupName = "Parameters of strategy")]
-        public double FirstTargetPercent
-        { get; set; }
-
-        [NinjaScriptProperty]
-        [Display(Name = "Second target percentage", Order = 10, GroupName = "Parameters of strategy")]
-        public double SecondTargetPercent
-        { get; set; }
-
-        [NinjaScriptProperty]
-        [Display(Name = "Allow to move stop loss", Order = 11, GroupName = "Parameters of strategy")]
-        public bool IsAllowedToMoveStopLoss
         { get; set; }
 
         #endregion
