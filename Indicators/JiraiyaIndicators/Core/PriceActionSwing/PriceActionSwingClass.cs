@@ -13,7 +13,7 @@ namespace NinjaTrader.Custom.Indicators.JiraiyaIndicators.PriceActionSwing
         private readonly SwingForwardCalculation swingForwardCalculation;
         private readonly SwingForwardCalculationOld swingForwardCalculationOld;
 
-        public CalculationTypeList CalculationType { get; private set; }
+        public CalculationTypeListPriceActionSwing CalculationType { get; private set; }
         public double Strength { get; private set; }
         public bool UseHighLow { get; private set; }
         public bool ShowPoints { get; private set; }
@@ -21,7 +21,7 @@ namespace NinjaTrader.Custom.Indicators.JiraiyaIndicators.PriceActionSwing
 
         // Initialization
 
-        public PriceActionSwingClass(NinjaScriptBase owner, DrawingProperties drawingProperties, CalculationTypeList calculationType,
+        public PriceActionSwingClass(NinjaScriptBase owner, DrawingProperties drawingProperties, CalculationTypeListPriceActionSwing calculationType,
                                      double strength, bool useHighLow, bool showPoints, bool showLines)
         {
             this.owner = owner;
@@ -81,13 +81,13 @@ namespace NinjaTrader.Custom.Indicators.JiraiyaIndicators.PriceActionSwing
         {
             switch (CalculationType)
             {
-                case CalculationTypeList.Tick:
+                case CalculationTypeListPriceActionSwing.Tick:
                     return tickCalculation;
 
-                case CalculationTypeList.SwingForward:
+                case CalculationTypeListPriceActionSwing.SwingForward:
                     return swingForwardCalculation;
 
-                case CalculationTypeList.SwingForwardOld:
+                case CalculationTypeListPriceActionSwing.SwingForwardOld:
                     return swingForwardCalculationOld;
             }
 
@@ -116,11 +116,4 @@ namespace NinjaTrader.Custom.Indicators.JiraiyaIndicators.PriceActionSwing
             private set { }
         }
     }
-}
-
-public enum CalculationTypeList
-{
-    Tick,
-    SwingForward,
-    SwingForwardOld
 }

@@ -14,16 +14,18 @@ namespace NinjaTrader.Custom.Indicators.JiraiyaIndicators.DowPivot
         private readonly TrendCalculation trendCalculation;
 
         public CalculationTypeListDowTheory CalculationType { get; private set; }
+        public OrderSideSignal LongShortSignal { get; set; }
 
         // Initialization
 
         public DowTheoryClass(NinjaScriptBase owner, DrawingProperties drawingProperties, CalculationTypeListDowTheory calculationTypeListDT,
-                              CalculationTypeList calculationTypeListPCW, double strength, bool useHighLow, bool showPoints, bool showLines,
+                              CalculationTypeListPriceActionSwing calculationTypeListPCW, double strength, bool useHighLow, bool showPoints, bool showLines,
                               double maxPercentOfPivotRetraction, double minPercentOfPivotRetraction)
         {
             this.owner = owner;
             this.drawingProperties = drawingProperties;
             CalculationType = calculationTypeListDT;
+            LongShortSignal = OrderSideSignal.Flat;
 
             priceActionSwingClass = new PriceActionSwingClass(owner, drawingProperties, calculationTypeListPCW, strength, 
                                                               useHighLow, showPoints, showLines);
@@ -65,12 +67,12 @@ namespace NinjaTrader.Custom.Indicators.JiraiyaIndicators.DowPivot
                 {
                     case MatrixPoints.WhichTrendSideSignal.Bullish:
                         // Enter a long signal
-                        owner.Value[0] = 1;
+                        LongShortSignal = OrderSideSignal.Buy;
                         break;
 
                     case MatrixPoints.WhichTrendSideSignal.Bearish:
                         // Enter a short signal
-                        owner.Value[0] = -1;
+                        LongShortSignal = OrderSideSignal.Sell;
                         break;
                 }
             }
@@ -91,10 +93,4 @@ namespace NinjaTrader.Custom.Indicators.JiraiyaIndicators.DowPivot
             return null;
         }
     }
-}
-
-public enum CalculationTypeListDowTheory
-{
-    Trend,
-    Pivot
 }

@@ -29,7 +29,7 @@ namespace NinjaTrader.NinjaScript.Indicators.JiraiyaIndicators
 				ScaleJustification							= NinjaTrader.Gui.Chart.ScaleJustification.Right;
 				IsSuspendedWhileInactive					= true;
 
-                CalculationType                             = CalculationTypeList.SwingForward;
+                CalculationType                             = CalculationTypeListPriceActionSwing.SwingForward;
 				Strength					                = 2;
 				UseHighLow					                = true;
 				ShowPoints					                = true;
@@ -72,7 +72,7 @@ namespace NinjaTrader.NinjaScript.Indicators.JiraiyaIndicators
         #region Properties
         [NinjaScriptProperty]
         [Display(Name = "Calculation type", Order = 0, GroupName = "Parameters")]
-        public CalculationTypeList CalculationType
+        public CalculationTypeListPriceActionSwing CalculationType
         { get; set; }
 
         [NinjaScriptProperty]
@@ -109,12 +109,12 @@ namespace NinjaTrader.NinjaScript.Indicators
 	public partial class Indicator : NinjaTrader.Gui.NinjaScript.IndicatorRenderBase
 	{
 		private JiraiyaIndicators.PriceActionSwingIndicator[] cachePriceActionSwingIndicator;
-		public JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(CalculationTypeList calculationType, double strength, bool useHighLow)
+		public JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(CalculationTypeListPriceActionSwing calculationType, double strength, bool useHighLow)
 		{
 			return PriceActionSwingIndicator(Input, calculationType, strength, useHighLow);
 		}
 
-		public JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(ISeries<double> input, CalculationTypeList calculationType, double strength, bool useHighLow)
+		public JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(ISeries<double> input, CalculationTypeListPriceActionSwing calculationType, double strength, bool useHighLow)
 		{
 			if (cachePriceActionSwingIndicator != null)
 				for (int idx = 0; idx < cachePriceActionSwingIndicator.Length; idx++)
@@ -129,12 +129,12 @@ namespace NinjaTrader.NinjaScript.MarketAnalyzerColumns
 {
 	public partial class MarketAnalyzerColumn : MarketAnalyzerColumnBase
 	{
-		public Indicators.JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(CalculationTypeList calculationType, double strength, bool useHighLow)
+		public Indicators.JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(CalculationTypeListPriceActionSwing calculationType, double strength, bool useHighLow)
 		{
 			return indicator.PriceActionSwingIndicator(Input, calculationType, strength, useHighLow);
 		}
 
-		public Indicators.JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(ISeries<double> input , CalculationTypeList calculationType, double strength, bool useHighLow)
+		public Indicators.JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(ISeries<double> input , CalculationTypeListPriceActionSwing calculationType, double strength, bool useHighLow)
 		{
 			return indicator.PriceActionSwingIndicator(input, calculationType, strength, useHighLow);
 		}
@@ -145,12 +145,12 @@ namespace NinjaTrader.NinjaScript.Strategies
 {
 	public partial class Strategy : NinjaTrader.Gui.NinjaScript.StrategyRenderBase
 	{
-		public Indicators.JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(CalculationTypeList calculationType, double strength, bool useHighLow)
+		public Indicators.JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(CalculationTypeListPriceActionSwing calculationType, double strength, bool useHighLow)
 		{
 			return indicator.PriceActionSwingIndicator(Input, calculationType, strength, useHighLow);
 		}
 
-		public Indicators.JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(ISeries<double> input , CalculationTypeList calculationType, double strength, bool useHighLow)
+		public Indicators.JiraiyaIndicators.PriceActionSwingIndicator PriceActionSwingIndicator(ISeries<double> input , CalculationTypeListPriceActionSwing calculationType, double strength, bool useHighLow)
 		{
 			return indicator.PriceActionSwingIndicator(input, calculationType, strength, useHighLow);
 		}
