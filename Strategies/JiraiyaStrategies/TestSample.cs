@@ -29,6 +29,7 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
     {
         private System.Windows.Controls.Button myBuyButton;
         private System.Windows.Controls.Button mySellButton;
+        private System.Windows.Controls.Button myCloseButton;
         private System.Windows.Controls.Grid myGrid;
 
         protected override void OnStateChange()
@@ -86,10 +87,12 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                     // Define the two columns in the grid, one for each button
                     System.Windows.Controls.ColumnDefinition column1 = new System.Windows.Controls.ColumnDefinition();
                     System.Windows.Controls.ColumnDefinition column2 = new System.Windows.Controls.ColumnDefinition();
+                    System.Windows.Controls.ColumnDefinition column3 = new System.Windows.Controls.ColumnDefinition();
 
                     // Add the columns to the Grid
                     myGrid.ColumnDefinitions.Add(column1);
                     myGrid.ColumnDefinitions.Add(column2);
+                    myGrid.ColumnDefinitions.Add(column3);
 
                     // Define the custom Buy Button control object
                     myBuyButton = new System.Windows.Controls.Button
@@ -109,17 +112,28 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                         Background = Brushes.Red
                     };
 
+                    myCloseButton = new System.Windows.Controls.Button
+                    {
+                        Name = "MyCloseButton",
+                        Content = "CLOSE",
+                        Foreground = Brushes.White,
+                        Background = Brushes.Black
+                    };
+
                     // Subscribe to each buttons click event to execute the logic we defined in OnMyButtonClick()
                     myBuyButton.Click += OnMyButtonClick;
                     mySellButton.Click += OnMyButtonClick;
+                    myCloseButton.Click += OnMyButtonClick;
 
                     // Define where the buttons should appear in the grid
                     System.Windows.Controls.Grid.SetColumn(myBuyButton, 0);
                     System.Windows.Controls.Grid.SetColumn(mySellButton, 1);
+                    System.Windows.Controls.Grid.SetColumn(myCloseButton, 2);
 
                     // Add the buttons as children to the custom grid
                     myGrid.Children.Add(myBuyButton);
                     myGrid.Children.Add(mySellButton);
+                    myGrid.Children.Add(myCloseButton);
 
                     // Finally, add the completed grid to the custom NinjaTrader UserControlCollection
                     UserControlCollection.Add(myGrid);
@@ -149,6 +163,12 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                             mySellButton.Click -= OnMyButtonClick;
                             mySellButton = null;
                         }
+                        if (myCloseButton != null)
+                        {
+                            myGrid.Children.Remove(myCloseButton);
+                            myCloseButton.Click -= OnMyButtonClick;
+                            myCloseButton = null;
+                        }
                     }
                 }));
             }
@@ -165,7 +185,33 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
         {
             System.Windows.Controls.Button button = sender as System.Windows.Controls.Button;
             if (button != null)
-                Print(button.Name + " Clicked");
+            {
+                Print(button.Name + " Clicked, " + button.Content);
+                
+                if (button.Content.ToString() == "LONG")
+                {
+                    EnterLong();
+                    EnterLongLimit(Close[0] - (TickSize * 5));
+                    Print(Close[0] + "    " + High[0]);
+                    //EnterShortStopMarket(Close[0] - (TickSize * 5));
+                }
+                else if (button.Content.ToString() == "SHORT")
+                {
+                    EnterShort();
+                }
+                else if (button.Content.ToString() == "CLOSE")
+                {
+                    switch(Position.MarketPosition)
+                    {
+                        case MarketPosition.Long:
+                            ExitLong();
+                            break;
+                        case MarketPosition.Short:
+                            ExitShort();
+                            break;
+                    }
+                }
+            }
         }
     }
 }
