@@ -146,6 +146,12 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
 
                 //This line prevents the same signal open another order in the same bar
                 DowTheoryIndicator1.ResetLongShortSignal();
+
+                PrintOrderToTheScream(firstProfitTargetOrder);
+                PrintOrderToTheScream(secondProfitTargetOrder);
+
+                PrintOrderToTheScream(firstStopLossOrder);
+                PrintOrderToTheScream(secondStopLossOrder);
             }
 
             // Test and increment the consecutive counter
@@ -222,6 +228,10 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                         SetStopLoss(secondEntryOrder.Name, CalculationMode.Price, Position.AveragePrice - (TickSize * 3), false);
                 }
             }
+        private void PrintOrderToTheScream(Order order)
+        {
+            Draw.Text(this, order.Name + order.FromEntrySignal + " draw1", order.LimitPrice.ToString(), 0, order.LimitPrice);
+            Draw.Text(this, order.Name + order.FromEntrySignal + " draw2", order.StopPrice.ToString(), 0, order.StopPrice);
         }
 
         private double TickValueForUSDQuote
