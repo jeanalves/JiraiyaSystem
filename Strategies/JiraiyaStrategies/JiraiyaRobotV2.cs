@@ -33,8 +33,8 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
         private Trade lastTrade;
         private Indicators.JiraiyaIndicators.DowTheoryIndicator DowTheoryIndicator1;
         private Dictionary<HourList, TimeSpan> hourDictionary;
-        private Order firstOrderEntry;
-        private Order secondOrderEntry;
+        private Order firstEntryOrder;
+        private Order secondEntryOrder;
 
         protected override void OnStateChange()
         {
@@ -113,12 +113,12 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             {
                 // First entry
                 string firstLongOrderSignalName = "First long entry  " + CurrentBar;
-                firstOrderEntry = EnterLong(DefaultQuantity, firstLongOrderSignalName);
+                firstEntryOrder = EnterLong(DefaultQuantity, firstLongOrderSignalName);
                 SetStopLossAndProfitTarget(SideTrade.Long, firstLongOrderSignalName, FirstTargetPercent);
 
                 // Second entry
                 string secondLongOrderSignalName = "Second long entry  " + CurrentBar;
-                secondOrderEntry = EnterLong(DefaultQuantity, secondLongOrderSignalName);
+                secondEntryOrder = EnterLong(DefaultQuantity, secondLongOrderSignalName);
                 SetStopLossAndProfitTarget(SideTrade.Long, secondLongOrderSignalName, SecondTargetPercent);
 
                 //This line prevents the same signal open another order in the same bar
@@ -130,12 +130,12 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             {
                 // First entry
                 string firstShortOrderSignalName = "First short entry " + CurrentBar;
-                firstOrderEntry = EnterShort(DefaultQuantity, firstShortOrderSignalName);
+                firstEntryOrder = EnterShort(DefaultQuantity, firstShortOrderSignalName);
                 SetStopLossAndProfitTarget(SideTrade.Short, firstShortOrderSignalName, FirstTargetPercent);
 
                 // Second entry
                 string secondShortOrderSignalName = "Second short entry " + CurrentBar;
-                secondOrderEntry = EnterShort(DefaultQuantity, secondShortOrderSignalName);
+                secondEntryOrder = EnterShort(DefaultQuantity, secondShortOrderSignalName);
                 SetStopLossAndProfitTarget(SideTrade.Short, secondShortOrderSignalName, SecondTargetPercent);
 
                 //This line prevents the same signal open another order in the same bar
@@ -179,16 +179,16 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             }
 
             // Move stop loss if the first target price is filled/executed
-            if (firstOrderEntry != null &&
-                order.FromEntrySignal == firstOrderEntry.Name && 
+            if (firstEntryOrder != null &&
+                order.FromEntrySignal == firstEntryOrder.Name && 
                 IsAllowedToMoveStopLoss)
             {
                 if(order.OrderState == OrderState.Filled)
                 {
                     if (Position.MarketPosition == MarketPosition.Long)
-                        SetStopLoss(secondOrderEntry.Name, CalculationMode.Price, Position.AveragePrice + (TickSize * 3),false);
+                        SetStopLoss(secondEntryOrder.Name, CalculationMode.Price, Position.AveragePrice + (TickSize * 3),false);
                     else if (Position.MarketPosition == MarketPosition.Short)
-                        SetStopLoss(secondOrderEntry.Name, CalculationMode.Price, Position.AveragePrice - (TickSize * 3), false);
+                        SetStopLoss(secondEntryOrder.Name, CalculationMode.Price, Position.AveragePrice - (TickSize * 3), false);
                 }
             }
         }
