@@ -193,8 +193,6 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             // Save orders to keep trake of then
             if (orderState == OrderState.Submitted)
             {
-                Print("Name: " + order.Name + "   FromEntrySignal: " + order.FromEntrySignal + "    Order type: " + order.OrderType);
-
                 if(order.Name == "Stop loss")
                 {
                     if (order.FromEntrySignal == firstEntryOrder.Name)
@@ -214,22 +212,22 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                 }
             }
 
-
             // Move stop loss if the first target price is filled/executed
-            if (firstEntryOrder != null &&
-                order.FromEntrySignal == firstEntryOrder.Name && 
-                IsAllowedToMoveStopLoss)
+            if(firstProfitTargetOrder != null &&
+               firstProfitTargetOrder.OrderState == OrderState.Filled)
             {
-                if(order.OrderState == OrderState.Filled)
-                {
-                    if (Position.MarketPosition == MarketPosition.Long)
-                        SetStopLoss(secondEntryOrder.Name, CalculationMode.Price, Position.AveragePrice + (TickSize * 3),false);
-                    else if (Position.MarketPosition == MarketPosition.Short)
-                        SetStopLoss(secondEntryOrder.Name, CalculationMode.Price, Position.AveragePrice - (TickSize * 3), false);
-                }
+                if (Position.MarketPosition == MarketPosition.Long)
+                    SetStopLoss(secondEntryOrder.Name, CalculationMode.Price, Position.AveragePrice + (TickSize * 3),false);
+                else if (Position.MarketPosition == MarketPosition.Short)
+                    SetStopLoss(secondEntryOrder.Name, CalculationMode.Price, Position.AveragePrice - (TickSize * 3), false);
             }
+        }
+
         private void PrintOrderToTheScream(Order order)
         {
+            if (order == null)
+                return;
+
             Draw.Text(this, order.Name + order.FromEntrySignal + " draw1", order.LimitPrice.ToString(), 0, order.LimitPrice);
             Draw.Text(this, order.Name + order.FromEntrySignal + " draw2", order.StopPrice.ToString(), 0, order.StopPrice);
         }
