@@ -33,8 +33,14 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
         private Trade lastTrade;
         private Indicators.JiraiyaIndicators.DowTheoryIndicator DowTheoryIndicator1;
         private Dictionary<HourList, TimeSpan> hourDictionary;
+
         private Order firstEntryOrder;
         private Order secondEntryOrder;
+        private Order firstStopLossOrder;
+        private Order secondStopLossOrder;
+        private Order firstProfitTargetOrder;
+        private Order secondProfitTargetOrder;
+
 
         protected override void OnStateChange()
         {
@@ -112,12 +118,12 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             if (DowTheoryIndicator1[0] == Buy)
             {
                 // First entry
-                string firstLongOrderSignalName = "First long entry  " + CurrentBar;
+                string firstLongOrderSignalName = "First long entry " + CurrentBar;
                 firstEntryOrder = EnterLong(DefaultQuantity, firstLongOrderSignalName);
                 SetStopLossAndProfitTarget(SideTrade.Long, firstLongOrderSignalName, FirstTargetPercent);
 
                 // Second entry
-                string secondLongOrderSignalName = "Second long entry  " + CurrentBar;
+                string secondLongOrderSignalName = "Second long entry " + CurrentBar;
                 secondEntryOrder = EnterLong(DefaultQuantity, secondLongOrderSignalName);
                 SetStopLossAndProfitTarget(SideTrade.Long, secondLongOrderSignalName, SecondTargetPercent);
 
@@ -177,6 +183,31 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
 
                 CloseCurrentPosition();
             }
+
+            // Save orders to keep trake of then
+            if (orderState == OrderState.Submitted)
+            {
+                Print("Name: " + order.Name + "   FromEntrySignal: " + order.FromEntrySignal + "    Order type: " + order.OrderType);
+
+                if(order.Name == "Stop loss")
+                {
+                    if (order.FromEntrySignal == firstEntryOrder.Name)
+                        firstStopLossOrder = order;
+
+                    if (order.FromEntrySignal == secondEntryOrder.Name)
+                        secondStopLossOrder = order;
+                }
+
+                if(order.Name == "Profit target")
+                {
+                    if (order.FromEntrySignal == firstEntryOrder.Name)
+                        firstProfitTargetOrder = order;
+
+                    if (order.FromEntrySignal == secondEntryOrder.Name)
+                        secondProfitTargetOrder = order;
+                }
+            }
+
 
             // Move stop loss if the first target price is filled/executed
             if (firstEntryOrder != null &&
