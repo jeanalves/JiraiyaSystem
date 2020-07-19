@@ -125,7 +125,10 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                     Adapter.PlaybackAdapter.PlaybackSpeed = 25;
                 }
 
-                Draw.TextFixed(this, "Current playback speed", "Playback speed: " + Adapter.PlaybackAdapter.PlaybackSpeed, TextPosition.BottomRight);
+                if (Adapter.PlaybackAdapter.PlaybackSpeed > 1000)
+                    Draw.TextFixed(this, "Current playback speed", "Playback speed: Max", TextPosition.BottomRight);
+                else
+                    Draw.TextFixed(this, "Current playback speed", "Playback speed: " + Adapter.PlaybackAdapter.PlaybackSpeed, TextPosition.BottomRight);
             }
 
             // Set 1
