@@ -81,6 +81,8 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                 FirstTargetPercent                              = 60;  // 61,8
                 SecondTargetPercent                             = 160; // 161,8
                 IsAllowedToMoveStopLoss                         = true;
+                //Parameters of playback connection
+                IsDelayOpenPositionsInPlaybackConnection        = true;
             }
             else if (State == State.Configure)
             {
@@ -115,7 +117,8 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                 return;
 
             // Slow down the strategy when is in playback connection and when a position is opened
-            if (Connection.PlaybackConnection.Status == ConnectionStatus.Connected && !IsInStrategyAnalyzer && State == State.Realtime)
+            if (Connection.PlaybackConnection.Status == ConnectionStatus.Connected && !IsInStrategyAnalyzer && 
+                State == State.Realtime && IsDelayOpenPositionsInPlaybackConnection)
             {
                 if(DowTheoryIndicator1[0] == Buy || DowTheoryIndicator1[0] == Sell)
                 {
@@ -542,6 +545,10 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
         [NinjaScriptProperty]
         [Display(Name = "Allow to move stop loss", Order = 11, GroupName = "Parameters of strategy")]
         public bool IsAllowedToMoveStopLoss
+        { get; set; }
+
+        [Display(Name = "Delay open positions when in Playback Connection", Order = 12, GroupName = "Parameters of playback connection")]
+        public bool IsDelayOpenPositionsInPlaybackConnection
         { get; set; }
 
         #endregion
