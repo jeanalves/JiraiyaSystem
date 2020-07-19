@@ -117,7 +117,7 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                 return;
 
             // Slow down the strategy when is in playback connection and when a position is opened
-            if (Connection.PlaybackConnection.Status == ConnectionStatus.Connected && !IsInStrategyAnalyzer && 
+            if (!IsInStrategyAnalyzer && Connection.PlaybackConnection.Status == ConnectionStatus.Connected && 
                 State == State.Realtime && IsDelayOpenPositionsInPlaybackConnection)
             {
                 if(DowTheoryIndicator1[0] == Buy || DowTheoryIndicator1[0] == Sell)
