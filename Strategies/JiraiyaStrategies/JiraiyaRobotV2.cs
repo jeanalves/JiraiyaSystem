@@ -114,6 +114,17 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                  Times[0][0].TimeOfDay < hourDictionary[MaxTime]))
                 return;
 
+            // Slow down the strategy when is in playback connection and when a position is opened
+            if (Connection.PlaybackConnection.Status == ConnectionStatus.Connected && !IsInStrategyAnalyzer && State == State.Realtime)
+            {
+                if(DowTheoryIndicator1[0] == Buy || DowTheoryIndicator1[0] == Sell)
+                {
+                    Adapter.PlaybackAdapter.PlaybackSpeed = 25;
+                }
+
+                Draw.TextFixed(this, "Current playback speed", "Playback speed: " + Adapter.PlaybackAdapter.PlaybackSpeed, TextPosition.BottomRight);
+            }
+
             // Set 1
             if (DowTheoryIndicator1[0] == Buy)
             {
