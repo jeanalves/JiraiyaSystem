@@ -111,11 +111,6 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             if (Position.MarketPosition != MarketPosition.Flat)
                 return;
 
-            // Disable trading outside the time range
-            if (!(Times[0][0].TimeOfDay > hourDictionary[MinTime] &&
-                 Times[0][0].TimeOfDay < hourDictionary[MaxTime]))
-                return;
-
             // Slow down the strategy when is in playback connection and when a position is opened
             if (!IsInStrategyAnalyzer && Connection.PlaybackConnection != null &&
                 Connection.PlaybackConnection.Status == ConnectionStatus.Connected && 
@@ -132,64 +127,9 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                     Draw.TextFixed(this, "Current playback speed", "Playback speed: " + Adapter.PlaybackAdapter.PlaybackSpeed, TextPosition.BottomRight);
             }
 
-            // Set 1
-            if (DowTheoryIndicator1[0] == Buy)
-            {
-                // First entry
-                string firstLongOrderSignalName = "First long entry " + CurrentBar;
-                firstEntryOrder = EnterLong(DefaultQuantity, firstLongOrderSignalName);
-                SetStopLossAndProfitTarget(SideTrade.Long, firstLongOrderSignalName, FirstTargetPercent);
-
-                // Second entry
-                string secondLongOrderSignalName = "Second long entry " + CurrentBar;
-                secondEntryOrder = EnterLong(DefaultQuantity, secondLongOrderSignalName);
-                SetStopLossAndProfitTarget(SideTrade.Long, secondLongOrderSignalName, SecondTargetPercent);
-
-                //This line prevents the same signal open another order in the same bar
-                DowTheoryIndicator1.ResetLongShortSignal();
-            }
-
-            // Set 2
-            if (DowTheoryIndicator1[0] == Sell)
-            {
-                // First entry
-                string firstShortOrderSignalName = "First short entry " + CurrentBar;
-                firstEntryOrder = EnterShort(DefaultQuantity, firstShortOrderSignalName);
-                SetStopLossAndProfitTarget(SideTrade.Short, firstShortOrderSignalName, FirstTargetPercent);
-
-                // Second entry
-                string secondShortOrderSignalName = "Second short entry " + CurrentBar;
-                secondEntryOrder = EnterShort(DefaultQuantity, secondShortOrderSignalName);
-                SetStopLossAndProfitTarget(SideTrade.Short, secondShortOrderSignalName, SecondTargetPercent);
-
-                //This line prevents the same signal open another order in the same bar
-                DowTheoryIndicator1.ResetLongShortSignal();
-
-                PrintOrderToTheScream(firstProfitTargetOrder);
-                PrintOrderToTheScream(secondProfitTargetOrder);
-
-                PrintOrderToTheScream(firstStopLossOrder);
-                PrintOrderToTheScream(secondStopLossOrder);
-            }
-
-            // Test and increment the consecutive counter
-            if (SystemPerformance.AllTrades.Count != 0 && SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1].ProfitTicks > 0 &&
-                SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1] != lastTrade)
-            {
-                consecutiveWinTradeCounter++;
-                lastTrade = SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1];
-            }
-            else if(SystemPerformance.AllTrades.Count != 0 && SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1].ProfitTicks < 0)
-            {
-                consecutiveWinTradeCounter = 0;
-            }
-
-            // Criar c�digo para calcular quantidade de contratos utilizando estrat�gia de soros
-
-            // Calcular pre�o do tick ou pip
-            // Multiplicar pela quantidade de lotes
-
-            // Criar c�digo para aplicar estrat�gia de soros
+            // Here is where all the magic happens
+            StrategyLogic();
+            
             if(IsInStrategyAnalyzer)
                 PrintStrategyStatus();
         }
@@ -250,13 +190,65 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             }
         }
 
-        private void PrintOrderToTheScream(Order order)
+        public void StrategyLogic()
         {
-            if (order == null)
+            // Disable trading outside the time range
+            if (!(Times[0][0].TimeOfDay > hourDictionary[MinTime] &&
+                 Times[0][0].TimeOfDay < hourDictionary[MaxTime]))
                 return;
+            
+            // Set 1
+            if (DowTheoryIndicator1[0] == Buy)
+            {
+                // First entry
+                string firstLongOrderSignalName = "First long entry " + CurrentBar;
+                firstEntryOrder = EnterLong(DefaultQuantity, firstLongOrderSignalName);
+                SetStopLossAndProfitTarget(SideTrade.Long, firstLongOrderSignalName, FirstTargetPercent);
 
-            Draw.Text(this, order.Name + order.FromEntrySignal + " draw1", order.LimitPrice.ToString(), 0, order.LimitPrice);
-            Draw.Text(this, order.Name + order.FromEntrySignal + " draw2", order.StopPrice.ToString(), 0, order.StopPrice);
+                // Second entry
+                string secondLongOrderSignalName = "Second long entry " + CurrentBar;
+                secondEntryOrder = EnterLong(DefaultQuantity, secondLongOrderSignalName);
+                SetStopLossAndProfitTarget(SideTrade.Long, secondLongOrderSignalName, SecondTargetPercent);
+
+                //This line prevents the same signal open another order in the same bar
+                DowTheoryIndicator1.ResetLongShortSignal();
+            }
+
+            // Set 2
+            if (DowTheoryIndicator1[0] == Sell)
+            {
+                // First entry
+                string firstShortOrderSignalName = "First short entry " + CurrentBar;
+                firstEntryOrder = EnterShort(DefaultQuantity, firstShortOrderSignalName);
+                SetStopLossAndProfitTarget(SideTrade.Short, firstShortOrderSignalName, FirstTargetPercent);
+
+                // Second entry
+                string secondShortOrderSignalName = "Second short entry " + CurrentBar;
+                secondEntryOrder = EnterShort(DefaultQuantity, secondShortOrderSignalName);
+                SetStopLossAndProfitTarget(SideTrade.Short, secondShortOrderSignalName, SecondTargetPercent);
+
+                //This line prevents the same signal open another order in the same bar
+                DowTheoryIndicator1.ResetLongShortSignal();
+            }
+
+            // Test and increment the consecutive counter
+            if (SystemPerformance.AllTrades.Count != 0 && SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1].ProfitTicks > 0 &&
+                SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1] != lastTrade)
+            {
+                consecutiveWinTradeCounter++;
+                lastTrade = SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1];
+            }
+            else if (SystemPerformance.AllTrades.Count != 0 && SystemPerformance.AllTrades[SystemPerformance.AllTrades.Count - 1].ProfitTicks < 0)
+            {
+                consecutiveWinTradeCounter = 0;
+            }
+
+            // Criar c�digo para calcular quantidade de contratos utilizando estrat�gia de soros
+
+            // Calcular pre�o do tick ou pip
+            // Multiplicar pela quantidade de lotes
+
+            // Criar c�digo para aplicar estrat�gia de soros
         }
 
         private double TickValueForUSDQuote
