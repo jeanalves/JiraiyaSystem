@@ -144,7 +144,7 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             }
             catch(Exception e)
             {
-                Print(e.ToString());
+                Code.Output.Process(e.ToString(), PrintTo.OutputTab2);
             }
         }
 
