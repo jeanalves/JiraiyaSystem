@@ -167,19 +167,19 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             {
                 if(order.Name == "Stop loss")
                 {
-                    if (order.FromEntrySignal == firstEntryOrder.Name)
+                    if (firstEntryOrder != null && order.FromEntrySignal == firstEntryOrder.Name)
                         firstStopLossOrder = order;
 
-                    if (order.FromEntrySignal == secondEntryOrder.Name)
+                    if (secondEntryOrder != null && order.FromEntrySignal == secondEntryOrder.Name)
                         secondStopLossOrder = order;
                 }
 
                 if(order.Name == "Profit target")
                 {
-                    if (order.FromEntrySignal == firstEntryOrder.Name)
+                    if (firstEntryOrder != null && order.FromEntrySignal == firstEntryOrder.Name)
                         firstProfitTargetOrder = order;
 
-                    if (order.FromEntrySignal == secondEntryOrder.Name)
+                    if (secondEntryOrder != null && order.FromEntrySignal == secondEntryOrder.Name)
                         secondProfitTargetOrder = order;
                 }
             }
