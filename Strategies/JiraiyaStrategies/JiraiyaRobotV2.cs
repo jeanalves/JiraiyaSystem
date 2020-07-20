@@ -63,6 +63,9 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
                 RealtimeErrorHandling                           = RealtimeErrorHandling.StopCancelCloseIgnoreRejects;
                 StopTargetHandling                              = StopTargetHandling.PerEntryExecution;
                 BarsRequiredToTrade                             = 0;
+                SetOrderQuantity                                = SetOrderQuantity.DefaultQuantity;
+                DefaultQuantity                                 = 5000;
+
                 // Disable this property for performance gains in Strategy Analyzer optimizations
                 // See the Help Guide for additional information
                 IsInstantiatedOnEachOptimizationIteration       = IsInstantiatedOnEachOptimizationIterationIsh;
