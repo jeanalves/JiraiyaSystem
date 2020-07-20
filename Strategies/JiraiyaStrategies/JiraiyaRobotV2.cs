@@ -101,37 +101,48 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
 
         protected override void OnBarUpdate()
         {
-            if (BarsInProgress != 0)
-                return;
-
-            if (CurrentBars[0] < 1)
-                return;
-
-            // Prevents opening another operation while one is already taking place
-            if (Position.MarketPosition != MarketPosition.Flat)
-                return;
-
-            // Slow down the strategy when is in playback connection and when a position is opened
-            if (!IsInStrategyAnalyzer && Connection.PlaybackConnection != null &&
-                Connection.PlaybackConnection.Status == ConnectionStatus.Connected && 
-                State == State.Realtime && IsDelayOpenPositionsInPlaybackConnection)
+            try
             {
-                if(DowTheoryIndicator1[0] == Buy || DowTheoryIndicator1[0] == Sell)
+                if (BarsInProgress != 0)
+                    return;
+
+                if (CurrentBars[0] < 1)
+                    return;
+
+                // Prevents opening orders in historical data
+                if (State == State.Historical && !IsInStrategyAnalyzer)
+                    return;
+
+                // Prevents opening another operation while one is already taking place
+                if (Position.MarketPosition != MarketPosition.Flat)
+                    return;
+
+                // Slow down the strategy when is in playback connection and when a position is opened
+                if (!IsInStrategyAnalyzer && Connection.PlaybackConnection != null &&
+                    Connection.PlaybackConnection.Status == ConnectionStatus.Connected &&
+                    State == State.Realtime && IsDelayOpenPositionsInPlaybackConnection)
                 {
-                    Adapter.PlaybackAdapter.PlaybackSpeed = 25;
+                    if (DowTheoryIndicator1[0] == Buy || DowTheoryIndicator1[0] == Sell)
+                    {
+                        Adapter.PlaybackAdapter.PlaybackSpeed = 25;
+                    }
+
+                    if (Adapter.PlaybackAdapter.PlaybackSpeed > 1000)
+                        Draw.TextFixed(this, "Current playback speed", "Playback speed: Max", TextPosition.BottomRight);
+                    else
+                        Draw.TextFixed(this, "Current playback speed", "Playback speed: " + Adapter.PlaybackAdapter.PlaybackSpeed, TextPosition.BottomRight);
                 }
 
-                if (Adapter.PlaybackAdapter.PlaybackSpeed > 1000)
-                    Draw.TextFixed(this, "Current playback speed", "Playback speed: Max", TextPosition.BottomRight);
-                else
-                    Draw.TextFixed(this, "Current playback speed", "Playback speed: " + Adapter.PlaybackAdapter.PlaybackSpeed, TextPosition.BottomRight);
-            }
+                // Here is where all the magic happens
+                StrategyLogic();
 
-            // Here is where all the magic happens
-            StrategyLogic();
-            
-            if(IsInStrategyAnalyzer)
-                PrintStrategyStatus();
+                if (IsInStrategyAnalyzer)
+                    PrintStrategyStatus();
+            }
+            catch(Exception e)
+            {
+                Print(e.ToString());
+            }
         }
 
         /// <summary>
