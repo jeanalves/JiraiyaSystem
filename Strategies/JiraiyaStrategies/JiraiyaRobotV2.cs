@@ -233,6 +233,15 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
             if(firstProfitTargetOrder != null &&
                firstProfitTargetOrder.OrderState == OrderState.Filled)
             {
+                // Hotfix for a bug that happens in real time connection and the historical data 
+                // interferes with strategy calculation and generate the following error: "Sim101, 
+                // Sell stop or stop limit order can't be placed above the market."
+                // Link to the Trello card issue: https://trello.com/c/xkHbMHZX/66-bug-gerado-em-confus%C3%A3o-de-ordens-de-dados-do-gr%C3%A1fico-hist%C3%B3rico-e-em-tempo-real
+                firstEntryOrder = null;
+                firstProfitTargetOrder = null;
+                firstStopLossOrder = null;
+                // End of hotfix
+
                 if (Position.MarketPosition == MarketPosition.Long)
                     SetStopLoss(secondEntryOrder.Name, CalculationMode.Price, Position.AveragePrice + (TickSize * 3),false);
                 else if (Position.MarketPosition == MarketPosition.Short)
