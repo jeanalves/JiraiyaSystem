@@ -186,7 +186,8 @@ namespace NinjaTrader.NinjaScript.Strategies.JiraiyaStrategies
 
             // Move stop loss if the first target price is filled/executed
             if(firstProfitTargetOrder != null &&
-               firstProfitTargetOrder.OrderState == OrderState.Filled)
+               firstProfitTargetOrder.OrderState == OrderState.Filled &&
+               IsAllowedToMoveStopLoss)
             {
                 // Hotfix for a bug that happens in real time connection and the historical data 
                 // interferes with strategy calculation and generate the following error: "Sim101, 
